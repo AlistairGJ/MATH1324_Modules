@@ -1,0 +1,327 @@
+---
+title: "Module_7"
+author: "AGJ notes from RMIT"
+date: "02/10/2017"
+output: html_document
+---
+
+## Packages + Data
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(gsheet)
+library(vembedr)
+library(gridExtra)
+library("htmltools")
+Body_temp <- gsheet2tbl('https://docs.google.com/spreadsheets/d/1FV0Bw2BAM1EbedSW4SCU2G54ObxP0jA429GnDUlAO1g/edit?usp=sharing')
+```
+
+```{r}
+Body_temp %>% summarise(Min = min(Body_temp,na.rm = TRUE),
+                        Q1 = quantile(Body_temp,probs = .25,na.rm = TRUE),
+                        Median = median(Body_temp, na.rm = TRUE),
+                        Q3 = quantile(Body_temp,probs = .75,na.rm = TRUE),
+                        Max = max(Body_temp,na.rm = TRUE),
+                        Mean = mean(Body_temp, na.rm = TRUE),
+                        SD = sd(Body_temp, na.rm = TRUE),
+                        n = n(),
+                        Missing = sum(is.na(Body_temp)))
+```
+
+```{r}
+Body_temp$Body_temp %>% boxplot(ylab = "Temperature (Celsius)")
+```
+## Critical Value Approach + t sampling distribution
+One tail test
+```{r}
+qt(p = 0.05, df = 130-1, lower.tail = TRUE)
+```
+
+```{r}
+tcrittomean <- function(t ,mu, s, n) {
+  se <- s/sqrt(n)
+  x_bar <- mu + (t*se) #Determine critical mean
+  return(x_bar)
+}
+```
+This function can now be called:
+```{r}
+tcrittomean(t = qt(0.05, 130-1, lower.tail = TRUE),
+     mu = 37, 
+     s = sd(Body_temp$Body_temp),
+     n = length(Body_temp$Body_temp))
+```
+
+## Title
+Text
+```{r}
+qt(p = 0.05/2, df = 130-1, lower.tail = TRUE)
+```
+Text
+```{r}
+tcrittomean(t = qt(0.05/2,130-1,lower.tail = TRUE),
+            mu = 37, 
+            s = sd(Body_temp$Body_temp),
+            n = length(Body_temp$Body_temp))
+```
+The upper critical mean
+```{r}
+tcrittomean(t = qt(1-(0.05/2),130-1,lower.tail = TRUE),
+            mu = 37, 
+            s = sd(Body_temp$Body_temp),
+            n = length(Body_temp$Body_temp))
+```
+
+
+## p-value Approach
+Text
+```{r}
+t_stat <- function(x_bar, mu, s, n){
+  t <- (x_bar - mu)/(s/sqrt(n))
+  return(t)
+}
+```
+
+Text
+```{r}
+t <- t_stat(x_bar = mean(Body_temp$Body_temp),
+       mu <- 37,
+       s <- sd(Body_temp$Body_temp),
+       n <- length(Body_temp$Body_temp))
+t
+```
+We now calculate the exact pp-value using the pt() function:
+```{r}
+pt(q = t, df= 130 - 1)
+```
+
+```{r}
+pt(q = t, df= 130 - 1)*2
+```
+
+
+
+## Confidence Interval Approach
+Calculating CI in R
+```{r}
+t.test(Body_temp$Body_temp, conf.level = .95)$conf.int
+```
+
+## The one-sample tt-test in R
+Text
+```{r}
+t.test(Body_temp$Body_temp, mu = 37, alternative="less")
+```
+Example of the two-tailed hypothesis test:
+```{r}
+t.test(Body_temp$Body_temp, mu = 37, alternative="two.sided")
+```
+You can also change the significance level. For example, α=0.01α=0.01 of a 99% CI:
+```{r}
+t.test(Body_temp$Body_temp, mu = 37, conf.level = .99, alternative="two.sided")
+```
+
+## Two-sample tt-tests - Body Temperatures Revisited
+```{r}
+Body_temp %>% group_by(Gender) %>% summarise(Min = min(Body_temp,na.rm = TRUE),
+                                             Q1 = quantile(Body_temp,probs = .25,na.rm = TRUE),
+                                             Median = median(Body_temp, na.rm = TRUE),
+                                             Q3 = quantile(Body_temp,probs = .75,na.rm = TRUE),
+                                             Max = max(Body_temp,na.rm = TRUE),
+                                             Mean = mean(Body_temp, na.rm = TRUE),
+                                             SD = sd(Body_temp, na.rm = TRUE),
+                                             n = n(),
+                                             Missing = sum(is.na(Body_temp)))
+```
+
+```{r}
+Body_temp %>% boxplot(Body_temp ~ Gender, data = ., ylab = "Temperature (Celsius)")
+```
+
+Let’s look at the body temperature distributions for males and females using the  qqPlot() function.
+```{r}
+install.packages("car")
+library(car)
+Body_temp_male <- Body_temp %>% filter(Gender == 1)
+Body_temp_male$Body_temp %>% qqPlot(dist="norm")
+```
+
+```{r}
+Body_temp_female <- Body_temp %>% filter(Gender == 2)
+Body_temp_female$Body_temp %>% qqPlot(dist="norm")
+```
+
+
+## Homogeneity of Variance
+```{r}
+leveneTest(Body_temp ~ Gender, data = Body_temp)
+```
+
+
+## Two-sample tt-test - Assuming Equal Variance
+```{r}
+t.test(
+  Body_temp ~ Gender,
+  data = Body_temp,
+  var.equal = TRUE,
+  alternative = "two.sided"
+  )
+```
+
+Assuming α=0.05α=0.05 and a two-tailed test, we find t∗t∗ using the R function:
+```{r}
+qt(p = 0.025, df = 65 + 65 - 2)
+```
+
+
+## Two-sample tt-test - Assuming Unequal Variance
+```{r}
+t.test(
+  Body_temp ~ Gender,
+  data = Body_temp,
+  var.equal = FALSE,
+  alternative = "two.sided"
+  )
+```
+
+
+
+
+# Prison Data
+
+```{r}
+PrisonStress %>% filter(Group == "Sport") %>%
+  summarise(
+  Min = min(PSSbefore, na.rm = TRUE),
+  Q1 = quantile(PSSbefore, probs = .25, na.rm = TRUE),
+  Median = median(PSSbefore, na.rm = TRUE),
+  Q3 = quantile(PSSbefore, probs = .75, na.rm = TRUE),
+  Max = max(PSSbefore, na.rm = TRUE),
+  Mean = mean(PSSbefore, na.rm = TRUE),
+  SD = sd(PSSbefore, na.rm = TRUE),
+  n = n(),
+  Missing = sum(is.na(PSSbefore))
+  )
+```
+
+```{r}
+PrisonStress %>% filter(Group == "Sport") %>%
+  summarise(
+  Min = min(PSSafter, na.rm = TRUE),
+  Q1 = quantile(PSSafter, probs = .25, na.rm = TRUE),
+  Median = median(PSSafter, na.rm = TRUE),
+  Q3 = quantile(PSSafter, probs = .75, na.rm = TRUE),
+  Max = max(PSSafter, na.rm = TRUE),
+  Mean = mean(PSSafter, na.rm = TRUE),
+  SD = sd(PSSafter, na.rm = TRUE),
+  n = n(),
+  Missing = sum(is.na(PSSafter))
+  )
+```
+
+```{r}
+PrisonStress <- PrisonStress %>% mutate(d = PSSafter - PSSbefore)
+```
+
+```{r}
+PrisonStress %>% filter(Group == "Sport") %>%
+  summarise(
+  Min = min(d, na.rm = TRUE),
+  Q1 = quantile(d, probs = .25, na.rm = TRUE),
+  Median = median(d, na.rm = TRUE),
+  Q3 = quantile(d, probs = .75, na.rm = TRUE),
+  Max = max(d, na.rm = TRUE),
+  Mean = mean(d, na.rm = TRUE),
+  SD = sd(d, na.rm = TRUE),
+  n = n(),
+  Missing = sum(is.na(d))
+  )
+```
+
+```{r}
+PrisonStress_sport <- PrisonStress %>% filter(Group == "Sport")
+qqPlot(PrisonStress_sport$d, dist="norm"
+```
+
+
+```{r}
+t.test(PrisonStress_sport$PSSafter, PrisonStress_sport$PSSbefore,
+       paired = TRUE,
+       alternative = "two.sided")
+```
+
+```{r}
+t.test(PrisonStress_sport$d, 
+       mu = 0, 
+       alternative = "two.sided")
+```
+
+```{r}
+qt(p = 0.025, df = 14)
+```
+
+```{r}
+2*pt(q = -2.68, df = 14)
+```
+
+## Paired Samples tt-test Visualisation
+
+```{r}
+boxplot(
+  PrisonStress_sport$PSSbefore,
+  PrisonStress_sport$PSSafter,
+  ylab = "Stress Ratings",
+  xlab = "Time"
+  )
+axis(1, at = 1:2, labels = c("Before", "After"))
+```
+
+```{r}
+matplot(t(data.frame(PrisonStress_sport$PSSbefore, PrisonStress_sport$PSSafter)),
+  type = "b",
+  pch = 19,
+  col = 1,
+  lty = 1,
+  xlab = "Time",
+  ylab = "Stress Ratings",
+  xaxt = "n"
+  )
+axis(1, at = 1:2, labels = c("Before", "After"))
+```
+
+```{r}
+library(granova)
+granova.ds(
+  data.frame(PrisonStress_sport$PSSbefore, PrisonStress_sport$PSSafter),
+  xlab = "Prison Stress - Before",
+  ylab = "Prison Stress - After"
+  )
+```
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

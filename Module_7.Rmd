@@ -15,6 +15,10 @@ library(vembedr)
 library(gridExtra)
 library("htmltools")
 Body_temp <- gsheet2tbl('https://docs.google.com/spreadsheets/d/1FV0Bw2BAM1EbedSW4SCU2G54ObxP0jA429GnDUlAO1g/edit?usp=sharing')
+cars <- gsheet2tbl('https://docs.google.com/spreadsheets/d/1oS7EsWOAYDoSwkSV4myvvPgkxamVavNsQeVLBb2BArw/edit?usp=sharing')
+exer_depr <- gsheet2tbl('https://docs.google.com/spreadsheets/d/1-dsxN6LeMrlpLLQ062iA6H3w9o4XrN1jMjSPkmjmFVA/edit?usp=sharing')
+leg_press <- gsheet2tbl('https://docs.google.com/spreadsheets/d/1jwh0T-RehDBw9QEh0ZU8gncfIWaQpPamkOZXRqkvCwo/edit?usp=sharing')
+times <- gsheet2tbl('https://docs.google.com/spreadsheets/d/1AX0iwJJa7HaolRblgjYrPdnd0GrJnWOrp6UYJZVMS6o/edit?usp=sharing')
 ```
 
 ```{r}
@@ -299,22 +303,50 @@ granova.ds(
   )
 ```
 
-```{r}
 
+###Question 10  - Mean of Running Time (times) (NO check)
+###Question 11  - DS of Running Time (times) (NO check)
+```{r}
+summary(times)
+```
+
+```{r}
+times %>% summarise(Min = min(Time,na.rm = TRUE),
+                        Q1 = quantile(Time,probs = .25,na.rm = TRUE),
+                        Median = median(Time, na.rm = TRUE),
+                        Q3 = quantile(Time,probs = .75,na.rm = TRUE),
+                        Max = max(Time,na.rm = TRUE),
+                        Mean = mean(Time, na.rm = TRUE),
+                        SD = sd(Time, na.rm = TRUE),
+                        n = n(),
+                        Missing = sum(is.na(Time)))
+```
+
+https://statistics.berkeley.edu/computing/r-t-tests
+
+### Question 14
+```{r}
+t.test(times$Time, mu = 14, alternative = "two.sided")
+```
+
+
+### Question 14
+```{r}
+t.test(times$Time, mu = 14, alternative="less")
 ```
 
 
 
 
+### Question 14
+```{r}
+t.test(times$Time, mu = 14, conf.level = 0.95, alternative = NULL)
+```
 
 
-
-
-
-
-
-
-
+```{r}
+t.test(times$Time, mu = 14, conf.level = 0.95, alternative="two.sided")
+```
 
 
 

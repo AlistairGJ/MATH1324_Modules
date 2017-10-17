@@ -68,7 +68,9 @@ mod8q4c
 ```{r }
 mod8q4c$expected
 ```
-
+```{r }
+mod8q4c$observed
+```
 
 
 

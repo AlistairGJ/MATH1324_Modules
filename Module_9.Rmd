@@ -1,0 +1,171 @@
+---
+title: "Module_9"
+author: "AlistairGJ"
+date: "20/10/2017"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r opening the packages, eval=FALSE}
+library(ggplot2)
+library(dplyr)
+library(gsheet)
+library(vembedr)
+library(gridExtra)
+library("htmltools")
+library(psychometric)
+library(Hmisc)
+heritabilty <- gsheet2tbl('https://docs.google.com/spreadsheets/d/17DMtUmnE8yz4s1aJFxDICL0gW_L8cnCUKnZgQ-rqeB4/edit?usp=sharing')
+```
+
+### Question 1
+How does a person's height relate to the height of their parents? The adult heights (inches) of 898 children from 197 families were collected. In addition, the investigators also gathered the heights of the mother and father from each family. The data are reported in the Heritability.csv dataset (see Data Repository). Using this data, answer the following questions. 
+* Under which of the following situations is simple linear regression NOT suitable?
+
+*Linear Regression*
+* Corr
+
+```{r mod8q1, echo=FALSE}
+mod8q1 <- "IF the response variable is categorical, linear regression is NOT suitable"
+```
+
+### Question 2
+
+Calculate the correlation between a person's height and their father's height. Round your answer to three decimal places.
+
+```{r mod8q2_a1, echo=FALSE}
+plot(height ~ father, data = heritabilty, xlab = "father", ylab = "child")
+```
+
+```{r mod8q2_a2, echo=FALSE}
+mod8q2_a2 <- lm(height ~ father, data = heritabilty)
+mod8q2_a2
+cor(heritabilty$height, heritabilty$father)
+mod8q2_a2 %>% summary() 
+```
+
+```{r mod8q2_c, echo=FALSE}
+mod8q2_c <- cor(heritabilty$father, heritabilty$height)
+mod8q2_c
+```
+
+### Question 3
+Which of the following best describes the nature of the correlation between height and father's height?
+
+* Perform full correlation analysis in R using rcorr function 
+
+```{r, echo=FALSE}
+#Create a matrix of the variables to be correlated
+bivariate_mod9q3 <- as.matrix(dplyr::select(heritabilty, height, father))
+# data, y, x
+```
+
+```{r, echo=FALSE}
+rcorr(bivariate_mod9q3, type = "pearson")
+```
+R reports the correlation between FATHER and HEIGHT to be r=.28 and the p-value = 0, which we write as p<.001. A hypothesis test for r has the following statistical hypotheses:
+
+* H0:r=0
+* HA:r≠0
+
+```{r, echo=FALSE}
+r_check = cor(heritabilty$father, heritabilty$height)
+CIr(r = r_check, n = 898 , level = .95)
+```
+
+"The was a statistically significant positive correlation between height of child (height) and father"
+
+### Question 11
+
+"A total of 7.6% of the variability in a father's height can be explained by a linear relationship with their child's height."
+
+```{r, echo=FALSE}
+mod8q2_a2 %>% confint()
+```
+
+- Does not capture 95% CI, reject H0
+
+## Crawling
+
+```{r, echo=FALSE}
+crawling <- gsheet2tbl('https://docs.google.com/spreadsheets/d/1D5G2HNVSJOFeAp8-x2BHD-uM4CFwb0-LG5jSf__IgzU/edit?usp=sharing')
+```
+
+This study investigated whether babies take longer to learn to crawl in cold months when they are often bundled in clothes that restrict their movement, than in warmer months. The study sought an association between babies' first crawling age and the average temperature (Fahrenheit) during the month they first try to crawl (about 6 months after birth). Parents brought their babies into the University of Denver Infant Study Center between 1988-1991 for the study. The parents reported the birth month and age at which their child was first able to creep or crawl a distance of four feet in one minute. Data were collected on 208 boys and 206 girls (40 pairs of which were twins).The Crawling.csv dataset can be downloaded from the Data Repository. The file contains summary data including the number of infants born during each month, the mean and standard deviation of their crawling ages, and the average monthly temperature six months after the birth month. Using this data, you will determine if there is a linear relationship between temperature and crawling age. Which of the following variables will be considered to be the predictor?
+
+PREDICTOR = Temperature, X
+
+
+```{r, echo=FALSE}
+plot(avg_crawling_age ~ temperature, data = crawling, xlab = "temperature", ylab = "av_crawling_age")
+```
+
+
+```{r mod9q22, echo=FALSE}
+mod9q22 <- cor(crawling$avg_crawling_age, crawling$temperature)
+mod9q22
+```
+
+```{r, echo=FALSE}
+#Create a matrix of the variables to be correlated
+bivariate_mod9q24 <- as.matrix(dplyr::select(crawling, avg_crawling_age, temperature))
+rcorr(bivariate_mod9q24, type = "pearson")
+# data, y, x
+```
+
+BOUNDS FOR CORRELATION
+
+```{r, echo=FALSE}
+CIr(r = mod9q22, n = 12, level = .95)
+```
+
+SUMMARY
+
+```{r, echo=FALSE}
+crawling_linear <- lm(avg_crawling_age ~ temperature, data = crawling)
+crawling_linear %>% summary()
+```
+
+```{r, echo=FALSE}
+crawling_linear %>% confint()
+```
+
+```{r, echo=FALSE}
+crawling_linear %>% summary() %>% confint()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

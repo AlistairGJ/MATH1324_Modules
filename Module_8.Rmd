@@ -40,7 +40,7 @@ mod8q1 <- "Chi-squared Goodness of Fit Test"
 * HA observed population distribution is NOT consistent with the expected population distribution
 * We can use a χ2χ2 critical value or pp-value to decide whether to reject or fail to reject H0
 ```{r mod8q2 ans}
-mod8q2 <- "HA: At least two random integers between 0 to 9 has a population proportion NOT equal to 0.1"
+mod8q2 <- "HA: At least two random integers between 0 to 9 has a population proportion NOT equal to 0.1 b/c 'HA observed population distribution is NOT consistent with the expected population distribution' "
 ```
 
 ##### Question 3 (mod8q3) - Which one of the following hypotheses is the correct Null hypothesis for the statistical test chosen above?
@@ -53,12 +53,18 @@ mod8q3 <- "H0: Each random integer between 0 to 9 has a population proportion = 
 mod8q4a <- table(random) %>% prop.table()
 mod8q4a
 ```
+Which integer is the most underrepresented?
+```{r mod8q4a ans a_min}
+min(mod8q4a)
+```
+
+
 ```{r mod8q4b ans b}
 mod8q4b <- c(0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1)
 ```
 * Now run the Chi-square goodness of fit test using the previous table() and the chisq.test() function
 ```{r mod8q4c ans c}
-mod8q4c <- chisq.test(mod8q4a, p = mod8q4b)
+mod8q4c <- chisq.test(table(random), p = mod8q4b)
 mod8q4c
 ```
 * Why?
@@ -73,22 +79,40 @@ mod8q4c$observed
 ```
 
 
+```{r mod8q5 ans}
+max(mod8q4a)
+```
 
+### Colour .csv
 
+```{r opening the ds colour, eval=FALSE}
+colour <- gsheet2tbl('https://docs.google.com/spreadsheets/d/1xmZ40Dpn0bJ98cepa6ay-Ustl6cj7LlWibN5zEE3Syk/edit?usp=sharing')
+```
 
+```{r checking the table, eval=FALSE}
+table(colour$Gender, colour$Eyes)
+```
 
+```{r, eval=FALSE}
+table(colour$Gender, colour$Eyes) %>% prop.table(margin = 2)
+```
 
+```{r, eval=FALSE}
+colour_chi <- chisq.test(table(colour$Gender, colour$Eyes))
+colour_chi
+```
 
+```{r, eval=FALSE}
+colour_chi$observed
+```
 
+```{r, eval=FALSE}
+colour_chi$expected
+```
 
-
-
-
-
-
-
-
-
+```{r, eval=FALSE}
+qchisq(p = .95,df = 3)
+```
 
 
 
